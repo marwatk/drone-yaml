@@ -56,12 +56,13 @@ func WithVolumeSlice(volumes []string) func(*engine.Spec) {
 	to := map[string]string{}
 	for _, s := range volumes {
 		parts := strings.Split(s, ":")
-		if len(parts) != 2 {
+		if len(parts) == 2 {
+			to[parts[0]] = parts[1]
+		} else if len(parts) == 3 { // Windows style with drive letter
+			to[parts[0]+":"+parts[1]] = parts[2]
+		} else {
 			continue
 		}
-		key := parts[0]
-		val := parts[1]
-		to[key] = val
 	}
 	return WithVolumes(to)
 }

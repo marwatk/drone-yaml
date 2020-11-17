@@ -55,19 +55,28 @@ func TestWithVolumeSlice(t *testing.T) {
 		Docker: &engine.DockerConfig{},
 		Steps:  []*engine.Step{step},
 	}
-	vols := []string{"/path/on/host:/path/in/container"}
+	vols := []string{
+		"/path/on/host:/path/in/container",
+		"C:/path/on/windows/host:/path/in/container2",
+	}
 	WithVolumeSlice(vols)(spec)
 
-	if len(step.Volumes) == 0 {
-		t.Error("Expected volume added to container")
+	if len(step.Volumes) != 2 {
+		t.Error("Expected volumes added to container")
 	}
 	if got, want := step.Volumes[0].Path, "/path/in/container"; got != want {
 		t.Errorf("Want mount path %s, got %s", want, got)
 	}
-	if len(spec.Docker.Volumes) == 0 {
+	if len(spec.Docker.Volumes) != 2 {
 		t.Error("Expected volume added to spec")
 	}
 	if got, want := spec.Docker.Volumes[0].HostPath.Path, "/path/on/host"; got != want {
+		t.Errorf("Want host mount path %s, got %s", want, got)
+	}
+	if got, want := step.Volumes[1].Path, "/path/in/container2"; got != want {
+		t.Errorf("Want mount path %s, got %s", want, got)
+	}
+	if got, want := spec.Docker.Volumes[1].HostPath.Path, "C:/path/on/windows/host"; got != want {
 		t.Errorf("Want host mount path %s, got %s", want, got)
 	}
 }
